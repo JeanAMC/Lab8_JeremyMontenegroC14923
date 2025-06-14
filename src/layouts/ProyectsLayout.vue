@@ -1,44 +1,51 @@
-
 <template>
 
 <TopBar/>
+<div class="container h-screen flex flex-col">
+<FabButton @open-modal="showModal = true"/>
+<CustomModal :open="showModal" @close="showModal = false" @add-item="addItem" />
+  <Aside/>
+  <div class="contenido b"> 
+<RouterView v-slot="{ Component }">
+  <component :is="Component" v-if="Component" :tableData="tableData" />
+</RouterView>
 
-<div class="container">
- <FabButton></FabButton>
-  <aside class="barraizquierda a">
-
-  <details class="dropdown-top bg-base-500">
-    <summary class="btn m-1">Proyectos</summary>
-    <ul class="menu dropdown-content bg-white z-1 w-52 p-2 shadow-sm">
-      <li><a>No hay proyectos</a></li>
-    </ul>
-  </details>
-
-  <ul class="menu bg-base-500 text-white">
-    <li><a>Item 1</a></li>
-    <li>
-      <details open>
-        <summary>Parent</summary>
-        <ul>
-          <li><a>Submenu 1</a></li>
-          <li><a>Submenu 2</a></li>
-          <li>
-            <details open>
-              <summary>Parent</summary>
-              <ul>
-                <li><a>Submenu 1</a></li>
-                <li><a>Submenu 2</a></li>
-              </ul>
-            </details>
-          </li>
-        </ul>
-      </details>
-    </li>s
-    <li><a>Item 3</a></li>
-  </ul> 
-  </aside>
-
-  <div class="contenido b"> <RouterView /> </div>
+  
+  </div>
 </div>
 
 </template>
+
+<script>
+import { v4 as uuidv4 } from 'uuid'
+import TopBar from '@/components/icons/TopBar.vue'
+import FabButton from '@/components/icons/FabButton.vue'
+import Aside from '@/components/icons/Aside.vue'
+import CustomModal from '@/components/icons/CustomModal.vue'
+
+
+export default {
+  components: {
+    TopBar,
+    FabButton,
+    Aside,
+    CustomModal
+  },
+  data() {
+    return {
+      showModal: false,
+      tableData: []
+    }
+  },
+  methods: {
+    addItem(nuevo) {
+      this.tableData.push({
+        id: uuidv4(),
+        ...nuevo
+      })
+      this.showModal = false
+    }
+  }
+}
+
+</script>
