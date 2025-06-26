@@ -13,19 +13,45 @@
       <tbody>
         <tr v-for="(tarea, index) in proyecto?.tareas" :key="tarea.id">
           <td>{{ index + 1 }}</td>
-          <td>{{ tarea.nombre }}</td>
-                <td>    
-                <span v-if="tarea.completado" class="text-green-400 font-semibold">
-                    {{ tarea.fecha}}
-                </span>
-                <button 
-                    v-else 
-                    class="btn btn-sm btn-success"
-                    @click="completarTarea(tarea.id)"
-                >
-                    Marcar como completada
-                </button>
-                </td>
+
+          <td @dblclick="empezarEdicion(tarea)">
+            <template v-if="tareaEditandoId === tarea.id">
+              <input
+                v-model="nombreEditado"
+                @keyup.enter="guardarEdicion(tarea)"
+                @blur="guardarEdicion(tarea)"
+                class="input input-sm w-full text-black"
+                autofocus
+              />
+            </template>
+            <template v-else>
+              {{ tarea.nombre }}
+            </template>
+          </td>
+
+          <td>
+            <span v-if="tarea.completado" class="text-green-400 font-semibold">
+              {{ tarea.fecha }}
+            </span>
+            <template v-else>
+              <button
+                class="btn btn-sm btn-success mr-2"
+                @click="completarTarea(tarea.id)"
+              >
+                Marcar como completada
+              </button>
+            
+              <button
+              class="btn btn-sm btn-error"
+              @click="eliminarTarea(tarea.id)"
+            >
+              Eliminar
+            </button>
+            </template>
+
+
+
+          </td>
 
         </tr>
 
@@ -39,19 +65,16 @@
               placeholder="Nueva tarea"
             />
           </td>
-          <td>
-          </td>
+          <td></td>
         </tr>
       </tbody>
     </table>
   </div>
 </template>
 
-
-
 <script setup>
 import { useRoute } from 'vue-router'
-import { reactive } from 'vue'
+import { ref, reactive } from 'vue'
 import { useProjectsStore } from '@/stores/projectsStore'
 
 const route = useRoute()
@@ -59,9 +82,28 @@ const store = useProjectsStore()
 
 const proyecto = store.projects.find(p => p.id === route.params.id)
 
+const tareaEditandoId = ref(null)
+const nombreEditado = ref('')
+
 const nuevaTarea = reactive({
   nombre: ''
 })
+
+function empezarEdicion(tarea) {
+  tareaEditandoId.value = tarea.id
+  nombreEditado.value = tarea.nombre
+}
+function eliminarTarea(tareaId) {
+  store.deleteTaskFromProject(proyecto.id, tareaId)
+}
+
+
+function guardarEdicion(tarea) {
+  if (nombreEditado.value.trim()) {
+    store.updateTask(proyecto.id, tarea.id, nombreEditado.value)
+  }
+  tareaEditandoId.value = null
+}
 
 function agregarTarea() {
   if (!nuevaTarea.nombre.trim()) return
